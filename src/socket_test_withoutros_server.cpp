@@ -12,7 +12,7 @@
 #include <thread>
 #include <list>
  
-#define PORT 7000
+#define PORT 8090
 #define IP "127.0.0.1"
  
 int s;
@@ -26,7 +26,7 @@ void getConn()
     {
         int conn = accept(s, (struct sockaddr*)&servaddr, &len);
         li.push_back(conn);
-        printf("%d\n", conn);
+        printf("We connect %d\n", conn);
     }
 }
  
@@ -75,7 +75,7 @@ void sendMess()
 {
     while(1)
     {
-        char buf[1024];
+        char buf[3];
         fgets(buf, sizeof(buf), stdin);
         //printf("you are send %s", buf);
         std::list<int>::iterator it;
@@ -89,11 +89,20 @@ void sendMess()
 int main()
 {
     //new socket
+    int onflag;
     s = socket(AF_INET, SOCK_STREAM, 0);
+    onflag=1;
+    int ret = setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(void *)&onflag,sizeof(int));
+    // if(ret == -1)
+    // {
+    //     printf("setsockopt");
+    //     exit(1);
+    // }     
+
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(PORT);
-    servaddr.sin_addr.s_addr = inet_addr(IP);
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);//inet_addr(IP);
     if(bind(s, (struct sockaddr* ) &servaddr, sizeof(servaddr))==-1)
     {
         perror("bind");
